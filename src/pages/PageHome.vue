@@ -15,24 +15,30 @@ export default {
             if (this.cityQuery.length > 2) {
                 axios.get("https://geocoding-api.open-meteo.com/v1/search", {
                     params: {
-                        name = this.cityQuery,
-                        count = 5,
-                        format = json,
-                        language = en,
+                        name : this.cityQuery,
+                        count : 5,
+                        format: "json",
+                        language: "en",
                     }
                 }).then((response) => [
-                    this.suggestion = response.data.results.map(result => ({
-                        name: results.name,
-                        country: results.country,
-                        latitude: results.latitude,
+                    this.suggestions = response.data.results.map(result => ({
+                        name: result.name,
+                        country: result.country,
+                        latitude: result.latitude,
                         longitude: result.longitude,
-                    }));
+                    }))
                 ]).catch((error) => {
                     console.error("Error during the recovery of the suggestions:", error);
                 });
             } else {
                 this.suggestions = [];
             }
+        },
+
+        selectCity(suggestion) {
+            this.selectedCity = suggestion;
+            this.suggestions = [];
+            this.cityQuery = `${suggestion.name}, ${suggestion.country}`;
         }
     }
 };
