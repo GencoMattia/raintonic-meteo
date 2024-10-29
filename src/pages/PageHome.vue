@@ -1,7 +1,12 @@
 <script>
 import axios from 'axios';
+import { FontAwesomeIcon } from "../assets/js/font-awesome.js";
 
 export default {
+    components: {
+        FontAwesomeIcon,
+    },
+
     data() {
         return {
             cityQuery: "",
@@ -9,6 +14,7 @@ export default {
             selectedCity: null,
             currentWeatherData: null,
             hourlyWeatherData: null,
+            favoriteCities: [],
         };
     },
 
@@ -44,11 +50,12 @@ export default {
             this.suggestions = [];
             this.cityQuery = `${suggestion.name}, ${suggestion.country}`;
             this.fetchWeatherData(suggestion.latitude, suggestion.longitude);
+            console.log(this.selectedCity);
         },
 
         async fetchWeatherData(latitude, longitude) {
             event.preventDefault();
-            
+
             axios.get("https://api.open-meteo.com/v1/forecast", {
                 params: {
                     latitude: latitude,
@@ -59,7 +66,7 @@ export default {
             }).then((response) => {
                 console.log(response.data);
                 this.currentWeatherData = response.data.current_weather;
-                this.hourlyWeatherData = response.data.hourly;      
+                this.hourlyWeatherData = response.data.hourly;
             }).catch((error) => {
                 console.error("Error fetching weather data:", error);
             })
@@ -73,7 +80,41 @@ export default {
                 3: "Overcast",
             };
             return weatherConditions[weatherCode] || "Unknown";
-        }
+        },
+
+        toggleFavoriteCity() {
+            const favCity = {
+                name: this.selectedCity.name,
+                country: this.selectedCity.country,
+                latitude: this.selectedCity.latitude,
+                longitude: this.selectedCity.longitude,
+            };
+
+            const isFavoriteIndex = this.favoriteCities.findIndex(city =>
+                city.latitude === favCity.latitude && city.longitude === favCity.longitude
+            );
+
+            if (isFavoriteIndex === -1) {
+                this.favoriteCities.push(favCity);
+            } else {
+                this.favoriteCities.splice(isFavoriteIndex, 1);
+            }
+        },
+
+        saveFavoriteCities() {
+            localStorage.setItem('favoriteCities', JSON.stringify(this.favoriteCities));
+        },
+
+        loadFavoriteCities() {
+            const favoriteCities = localStorage.getItem('favoriteCities');
+            if (favoriteCities) {
+                this.favoriteCities = JSON.parse(favoriteCities);
+            }
+        },
+    },
+
+    mounted() {
+        this.loadFavoriteCities();
     }
 };
 </script>
@@ -88,8 +129,7 @@ export default {
 
                 <ul class="list-group mt-1" v-if="suggestions.length">
                     <li v-for="suggestion in suggestions" :key="suggestion.name + suggestion.country"
-                        class="list-group-item list-group-item-action"
-                        @click="selectCity(suggestion)">
+                        class="list-group-item list-group-item-action" @click="selectCity(suggestion)">
                         {{ suggestion.name }}, {{ suggestion.country }}
                     </li>
                 </ul>
@@ -103,9 +143,13 @@ export default {
                 <p class="card-text"><strong>Temperature:</strong> {{ currentWeatherData.temperature }} °C</p>
                 <p class="card-text"><strong>Wind Speed:</strong> {{ currentWeatherData.windspeed }} km/h</p>
                 <p class="card-text"><strong>Wind Direction:</strong> {{ currentWeatherData.winddirection }} °</p>
-                <p class="card-text"><strong>Condition:</strong> {{ getWeatherCondition(currentWeatherData.weathercode) }}</p>
+                <p class="card-text"><strong>Condition:</strong> {{ getWeatherCondition(currentWeatherData.weathercode)
+                    }}</p>
                 <p class="card-text"><strong>Time:</strong> {{ currentWeatherData.time }}</p>
             </div>
+            <font-awesome-icon
+                :icon="favoriteCities.some(city => city.latitude === selectedCity.latitude && city.longitude === selectedCity.longitude) ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"
+                @click="toggleFavoriteCity" />
         </div>
 
         <!-- <div class="mt-4" v-if="hourlyWeatherData">
