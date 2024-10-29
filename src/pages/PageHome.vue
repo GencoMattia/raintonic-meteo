@@ -14,6 +14,8 @@ export default {
 
     methods: {
         async fetchCitySuggestions() {
+            event.preventDefault();
+
             if (this.cityQuery.length > 2) {
                 axios.get("https://geocoding-api.open-meteo.com/v1/search", {
                     params: {
@@ -45,6 +47,8 @@ export default {
         },
 
         async fetchWeatherData(latitude, longitude) {
+            event.preventDefault();
+            
             axios.get("https://api.open-meteo.com/v1/forecast", {
                 params: {
                     latitude: latitude,
@@ -75,15 +79,16 @@ export default {
 </script>
 
 <template>
-    <div class="search-form">
-        <form>
+    <div class="search-form container mt-4">
+        <form @submit.prevent>
             <div class="mb-3">
                 <label for="inputCity" class="form-label">Type the city</label>
                 <input type="text" class="form-control" id="inputCity" aria-describedby="inputCity"
                     placeholder="ex: Milano" v-model="cityQuery" @input="fetchCitySuggestions">
 
-                <ul v-if="suggestions.length">
+                <ul class="list-group mt-1" v-if="suggestions.length">
                     <li v-for="suggestion in suggestions" :key="suggestion.name + suggestion.country"
+                        class="list-group-item list-group-item-action"
                         @click="selectCity(suggestion)">
                         {{ suggestion.name }}, {{ suggestion.country }}
                     </li>
@@ -92,24 +97,30 @@ export default {
             <button type="submit" class="btn btn-primary">Submit</button>
         </form>
 
-        <div v-if="currentWeatherData">
-            <h2>Weather Data for {{ selectedCity.name }}</h2>
-            <p><strong>Temperature:</strong> {{ currentWeatherData.temperature }} °C</p>
-            <p><strong>Wind Speed:</strong> {{ currentWeatherData.windspeed }} km/h</p>
-            <p><strong>Wind Direction:</strong> {{ currentWeatherData.winddirection }} °</p>
-            <p><strong>Condition:</strong> {{ getWeatherCondition(currentWeatherData.weathercode) }}</p>
-            <p><strong>Time:</strong> {{ currentWeatherData.time }}</p>
+        <div class="card mt-4" v-if="currentWeatherData">
+            <div class="card-body">
+                <h5 class="card-title">Weather Data for {{ selectedCity.name }}</h5>
+                <p class="card-text"><strong>Temperature:</strong> {{ currentWeatherData.temperature }} °C</p>
+                <p class="card-text"><strong>Wind Speed:</strong> {{ currentWeatherData.windspeed }} km/h</p>
+                <p class="card-text"><strong>Wind Direction:</strong> {{ currentWeatherData.winddirection }} °</p>
+                <p class="card-text"><strong>Condition:</strong> {{ getWeatherCondition(currentWeatherData.weathercode) }}</p>
+                <p class="card-text"><strong>Time:</strong> {{ currentWeatherData.time }}</p>
+            </div>
         </div>
 
-        <div v-if="hourlyWeatherData">
+        <!-- <div class="mt-4" v-if="hourlyWeatherData">
             <h3>Hourly Weather Forecast</h3>
-            <ul>
-                <li v-for="(temp, index) in hourlyWeatherData.temperature_2m" :key="index">
+            <ul class="list-group">
+                <li v-for="(temp, index) in hourlyWeatherData.temperature_2m" :key="index" class="list-group-item">
                     <strong>{{ hourlyWeatherData.time[index] }}</strong> - {{ temp }} °C
                 </li>
             </ul>
-        </div>
+        </div> -->
     </div>
 </template>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.search-form {
+    max-width: 600px;
+}
+</style>
