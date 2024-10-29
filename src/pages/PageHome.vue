@@ -7,6 +7,8 @@ export default {
             cityQuery: "",
             suggestions: [],
             selectedCity: null,
+            currentWeatherData: null,
+            hourlyWeatherData: null,
         };
     },
 
@@ -15,19 +17,19 @@ export default {
             if (this.cityQuery.length > 2) {
                 axios.get("https://geocoding-api.open-meteo.com/v1/search", {
                     params: {
-                        name : this.cityQuery,
-                        count : 5,
+                        name: this.cityQuery,
+                        count: 5,
                         format: "json",
                         language: "en",
                     }
-                }).then((response) => [
+                }).then((response) => {
                     this.suggestions = response.data.results.map(result => ({
                         name: result.name,
                         country: result.country,
                         latitude: result.latitude,
                         longitude: result.longitude,
                     }))
-                ]).catch((error) => {
+                }).catch((error) => {
                     console.error("Error during the recovery of the suggestions:", error);
                 });
             } else {
@@ -39,6 +41,34 @@ export default {
             this.selectedCity = suggestion;
             this.suggestions = [];
             this.cityQuery = `${suggestion.name}, ${suggestion.country}`;
+            this.fetchWeatherData(suggestion.latitude, suggestion.longitude);
+        },
+
+        async fetchWeatherData(latitude, longitude) {
+            axios.get("https://api.open-meteo.com/v1/forecast", {
+                params: {
+                    latitude: latitude,
+                    longitude: longitude,
+                    hourly: "temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m",
+                    current_weather: true,
+                }
+            }).then((response) => {
+                console.log(response.data);
+                this.currentWeatherData = response.data.current_weather;
+                this.hourlyWeatherData = response.data.hourly;      
+            }).catch((error) => {
+                console.error("Error fetching weather data:", error);
+            })
+        },
+
+        getWeatherCondition(weatherCode) {
+            const weatherConditions = {
+                0: "Clear sky",
+                1: "Mainly clear",
+                2: "Partly cloudy",
+                3: "Overcast",
+            };
+            return weatherConditions[weatherCode] || "Unknown";
         }
     }
 };
@@ -61,6 +91,24 @@ export default {
             </div>
             <button type="submit" class="btn btn-primary">Submit</button>
         </form>
+
+        <div v-if="currentWeatherData">
+            <h2>Weather Data for {{ selectedCity.name }}</h2>
+            <p><strong>Temperature:</strong> {{ currentWeatherData.temperature }} °C</p>
+            <p><strong>Wind Speed:</strong> {{ currentWeatherData.windspeed }} km/h</p>
+            <p><strong>Wind Direction:</strong> {{ currentWeatherData.winddirection }} °</p>
+            <p><strong>Condition:</strong> {{ getWeatherCondition(currentWeatherData.weathercode) }}</p>
+            <p><strong>Time:</strong> {{ currentWeatherData.time }}</p>
+        </div>
+
+        <div v-if="hourlyWeatherData">
+            <h3>Hourly Weather Forecast</h3>
+            <ul>
+                <li v-for="(temp, index) in hourlyWeatherData.temperature_2m" :key="index">
+                    <strong>{{ hourlyWeatherData.time[index] }}</strong> - {{ temp }} °C
+                </li>
+            </ul>
+        </div>
     </div>
 </template>
 
