@@ -15,7 +15,7 @@ export default {
             currentWeatherData: null,
             hourlyWeatherData: null,
             favoriteCities: [],
-            favoriteWeatherData: [],
+            favoriteWeatherData: {},
         };
     },
 
@@ -46,11 +46,11 @@ export default {
             }
         },
 
-        selectCity(suggestion) {
-            this.selectedCity = suggestion;
+        selectCity(city) {
+            this.selectedCity = city;
             this.suggestions = [];
-            this.cityQuery = `${suggestion.name}, ${suggestion.country}`;
-            this.fetchWeatherData(suggestion.latitude, suggestion.longitude);
+            this.cityQuery = `${city.name}, ${city.country}`;
+            this.fetchWeatherData(city.latitude, city.longitude);
             console.log(this.selectedCity);
         },
 
@@ -62,11 +62,11 @@ export default {
                     latitude: latitude,
                     longitude: longitude,
                     hourly: "temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m",
-                    current_weather: true,
+                    current: "temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m",
                 }
             }).then((response) => {
-                console.log(response.data);
-                this.currentWeatherData = response.data.current_weather;
+                console.log("API response:", response.data);
+                this.currentWeatherData = response.data.current;
                 this.hourlyWeatherData = response.data.hourly;
             }).catch((error) => {
                 console.error("Error fetching weather data:", error);
@@ -114,12 +114,12 @@ export default {
                         latitude: city.latitude,
                         longitude: city.longitude,
                         hourly: "temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m",
-                        current_weather: true,
+                        current: "temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m",
                     }
                 }).then(response => {
                     return {
                         city: city,
-                        weather: response.data.current_weather,
+                        weather: response.data.current,
                     };
                 });
             });
@@ -127,6 +127,7 @@ export default {
             try {
                 const results = await Promise.all(requests);
                 this.favoriteWeatherData = results;
+                console.log(`favoriteWeatherData: ${this.favoriteWeatherData.city}, ${this.favoriteWeatherData.weather}`);
             } catch (error) {
                 console.error("Error fetching weather data for favorite cities:", error);
             }
@@ -168,6 +169,7 @@ export default {
 
     mounted() {
         this.loadFavoriteCities();
+        console.log(this.favoriteCities);
     }
 };
 </script>
@@ -193,10 +195,10 @@ export default {
         <div class="card mt-4" v-if="currentWeatherData">
             <div class="card-body">
                 <h5 class="card-title">Weather Data for {{ selectedCity.name }}</h5>
-                <p class="card-text"><strong>Temperature:</strong> {{ currentWeatherData.temperature }} °C</p>
-                <p class="card-text"><strong>Wind Speed:</strong> {{ currentWeatherData.windspeed }} km/h</p>
-                <p class="card-text"><strong>Wind Direction:</strong> {{ currentWeatherData.winddirection }} °</p>
-                <p class="card-text"><strong>Condition:</strong> {{ getWeatherCondition(currentWeatherData.weathercode)
+                <p class="card-text"><strong>Temperature:</strong> {{ currentWeatherData.temperature_2m }} °C</p>
+                <p class="card-text"><strong>Wind Speed:</strong> {{ currentWeatherData.wind_speed_10m }} km/h</p>
+                <p class="card-text"><strong>Humidity:</strong> {{ currentWeatherData.relative_humidity_2m }} %</p>
+                <p class="card-text"><strong>Condition:</strong> {{ getWeatherCondition(currentWeatherData.weather_code)
                     }}</p>
                 <p class="card-text"><strong>Time:</strong> {{ currentWeatherData.time }}</p>
             </div>
@@ -207,17 +209,25 @@ export default {
 
         <div class="mt-4" v-if="favoriteWeatherData.length">
             <h3>Favorite Cities Weather</h3>
-            <div v-for="(item, index) in favoriteWeatherData" :key="index" class="card mt-2">
-                <div class="card-body">
-                    <h5 class="card-title">Weather Data for {{ item.city.name }}, {{ item.city.country }}</h5>
-                    <p class="card-text"><strong>Temperature:</strong> {{ item.weather.temperature }} °C</p>
-                    <p class="card-text"><strong>Wind Speed:</strong> {{ item.weather.windspeed }} km/h</p>
-                    <p class="card-text"><strong>Wind Direction:</strong> {{ item.weather.winddirection }} °</p>
-                    <p class="card-text"><strong>Condition:</strong> {{ getWeatherCondition(item.weather.weathercode) }}
-                    </p>
-                    <p class="card-text"><strong>Time:</strong> {{ item.weather.time }}</p>
-                </div>
-            </div>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>City</th>
+                        <th>Country</th>
+                        <th>Temperature</th>
+                        <th>Condition</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="(city, index) in favoriteWeatherData" :key="index" @click="selectCity(city.city)"
+                        style="cursor: pointer;">
+                        <td>{{ city.city.name }}</td>
+                        <td>{{ city.city.country }}</td>
+                        <td>{{ city.weather.temperature_2m }} °C</td>
+                        <td>{{ getWeatherCondition(city.weather.weather_code) }}</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
 
         <!-- <div class="mt-4" v-if="hourlyWeatherData">
