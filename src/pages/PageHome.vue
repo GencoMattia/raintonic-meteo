@@ -15,6 +15,7 @@ export default {
             currentWeatherData: null,
             hourlyWeatherData: null,
             favoriteCities: [],
+            favoriteWeatherData: [],
         };
     },
 
@@ -78,8 +79,57 @@ export default {
                 1: "Mainly clear",
                 2: "Partly cloudy",
                 3: "Overcast",
+                45: "Fog",
+                48: "Depositing rime fog",
+                51: "Light drizzle",
+                53: "Moderate drizzle",
+                55: "Dense drizzle",
+                56: "Light freezing drizzle",
+                57: "Dense freezing drizzle",
+                61: "Slight rain",
+                63: "Moderate rain",
+                65: "Heavy rain",
+                66: "Light freezing rain",
+                67: "Heavy freezing rain",
+                71: "Slight snowfall",
+                73: "Moderate snowfall",
+                75: "Heavy snowfall",
+                77: "Snow grains",
+                80: "Slight rain showers",
+                81: "Moderate rain showers",
+                82: "Violent rain showers",
+                85: "Slight snow showers",
+                86: "Heavy snow showers",
+                95: "Slight thunderstorm",
+                96: "Slight thunderstorm with hail",
+                99: "Heavy thunderstorm with hail",
             };
             return weatherConditions[weatherCode] || "Unknown";
+        },
+
+        async fetchWeatherForFavoriteCities() {
+            const requests = this.favoriteCities.map(city => {
+                return axios.get("https://api.open-meteo.com/v1/forecast", {
+                    params: {
+                        latitude: city.latitude,
+                        longitude: city.longitude,
+                        hourly: "temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m",
+                        current_weather: true,
+                    }
+                }).then(response => {
+                    return {
+                        city: city,
+                        weather: response.data.current_weather,
+                    };
+                });
+            });
+
+            try {
+                const results = await Promise.all(requests);
+                this.favoriteWeatherData = results;
+            } catch (error) {
+                console.error("Error fetching weather data for favorite cities:", error);
+            }
         },
 
         toggleFavoriteCity() {
@@ -99,6 +149,8 @@ export default {
             } else {
                 this.favoriteCities.splice(isFavoriteIndex, 1);
             }
+
+            this.saveFavoriteCities();
         },
 
         saveFavoriteCities() {
@@ -109,6 +161,7 @@ export default {
             const favoriteCities = localStorage.getItem('favoriteCities');
             if (favoriteCities) {
                 this.favoriteCities = JSON.parse(favoriteCities);
+                this.fetchWeatherForFavoriteCities();
             }
         },
     },
@@ -150,6 +203,21 @@ export default {
             <font-awesome-icon
                 :icon="favoriteCities.some(city => city.latitude === selectedCity.latitude && city.longitude === selectedCity.longitude) ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"
                 @click="toggleFavoriteCity" />
+        </div>
+
+        <div class="mt-4" v-if="favoriteWeatherData.length">
+            <h3>Favorite Cities Weather</h3>
+            <div v-for="(item, index) in favoriteWeatherData" :key="index" class="card mt-2">
+                <div class="card-body">
+                    <h5 class="card-title">Weather Data for {{ item.city.name }}, {{ item.city.country }}</h5>
+                    <p class="card-text"><strong>Temperature:</strong> {{ item.weather.temperature }} °C</p>
+                    <p class="card-text"><strong>Wind Speed:</strong> {{ item.weather.windspeed }} km/h</p>
+                    <p class="card-text"><strong>Wind Direction:</strong> {{ item.weather.winddirection }} °</p>
+                    <p class="card-text"><strong>Condition:</strong> {{ getWeatherCondition(item.weather.weathercode) }}
+                    </p>
+                    <p class="card-text"><strong>Time:</strong> {{ item.weather.time }}</p>
+                </div>
+            </div>
         </div>
 
         <!-- <div class="mt-4" v-if="hourlyWeatherData">
