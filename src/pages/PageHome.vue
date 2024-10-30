@@ -282,9 +282,7 @@ export default {
             <h3>Favorite Cities Weather</h3>
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <div>
-                    <button class="btn btn-secondary" @click="sortFavoriteCities">
-                        <font-awesome-icon :icon="isSortedAsc ? 'fa-sort-amount-down' : 'fa-sort-amount-up'" />
-                    </button>
+
                     <button class="btn btn-secondary ml-2" v-if="favoriteWeatherData !== initialFavoriteWeatherData"
                         @click="resetFavoriteCitiesOrder">
                         Reset Order
@@ -296,7 +294,12 @@ export default {
                     <tr>
                         <th>City</th>
                         <th>Country</th>
-                        <th>Temperature</th>
+                        <th>
+                            Temperature
+                            <button class="btn btn-secondary" @click="sortFavoriteCities">
+                                <font-awesome-icon :icon="isSortedAsc ? 'fa-sort-amount-down' : 'fa-sort-amount-up'" />
+                            </button>
+                        </th>
                         <th>Condition</th>
                     </tr>
                 </thead>
