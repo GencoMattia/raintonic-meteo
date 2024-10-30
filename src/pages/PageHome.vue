@@ -8,7 +8,6 @@ export default {
         FontAwesomeIcon,
         TemperatureChart,
     },
-
     data() {
         return {
             cityQuery: "",
@@ -22,7 +21,6 @@ export default {
             labels: [],
         };
     },
-
     methods: {
         async fetchCitySuggestions() {
             if (this.cityQuery.length > 2) {
@@ -39,7 +37,7 @@ export default {
                         country: result.country,
                         latitude: result.latitude,
                         longitude: result.longitude,
-                    }))
+                    }));
                 }).catch((error) => {
                     console.error("Error during the recovery of the suggestions:", error);
                 });
@@ -47,7 +45,6 @@ export default {
                 this.suggestions = [];
             }
         },
-
         selectCity(city) {
             this.selectedCity = city;
             this.suggestions = [];
@@ -55,7 +52,6 @@ export default {
             this.fetchWeatherData(city.latitude, city.longitude);
             console.log(this.selectedCity);
         },
-
         async fetchWeatherData(latitude, longitude) {
             axios.get("https://api.open-meteo.com/v1/forecast", {
                 params: {
@@ -68,18 +64,15 @@ export default {
                 console.log("API response:", response.data);
                 const hourlyData = response.data.hourly;
                 const currentData = response.data.current;
-
                 this.currentWeatherData = currentData;
                 this.temperatureData = hourlyData.temperature_2m.slice(0, 24);
-                this.labels = hourlyData.time.slice(0, 24).map(time => new Date(time).getHours() + ":00")
-
+                this.labels = hourlyData.time.slice(0, 24).map(time => new Date(time).getHours() + ":00");
                 console.log(this.temperatureData);
                 console.log(this.labels);
             }).catch((error) => {
                 console.error("Error fetching weather data:", error);
-            })
+            });
         },
-
         getWeatherCondition(weatherCode) {
             const weatherConditions = {
                 0: "Clear sky",
@@ -113,7 +106,6 @@ export default {
             };
             return weatherConditions[weatherCode] || "Unknown";
         },
-
         async fetchWeatherForFavoriteCities() {
             const requests = this.favoriteCities.map(city => {
                 return axios.get("https://api.open-meteo.com/v1/forecast", {
@@ -130,16 +122,14 @@ export default {
                     };
                 });
             });
-
             try {
                 const results = await Promise.all(requests);
                 this.favoriteWeatherData = results;
-                console.log(`favoriteWeatherData: ${this.favoriteWeatherData.city}, ${this.favoriteWeatherData.weather}`);
+                console.log(this.favoriteWeatherData);
             } catch (error) {
                 console.error("Error fetching weather data for favorite cities:", error);
             }
         },
-
         toggleFavoriteCity() {
             const favCity = {
                 name: this.selectedCity.name,
@@ -147,24 +137,19 @@ export default {
                 latitude: this.selectedCity.latitude,
                 longitude: this.selectedCity.longitude,
             };
-
             const isFavoriteIndex = this.favoriteCities.findIndex(city =>
                 city.latitude === favCity.latitude && city.longitude === favCity.longitude
             );
-
             if (isFavoriteIndex === -1) {
                 this.favoriteCities.push(favCity);
             } else {
                 this.favoriteCities.splice(isFavoriteIndex, 1);
             }
-
             this.saveFavoriteCities();
         },
-
         saveFavoriteCities() {
             localStorage.setItem('favoriteCities', JSON.stringify(this.favoriteCities));
         },
-
         loadFavoriteCities() {
             const favoriteCities = localStorage.getItem('favoriteCities');
             if (favoriteCities) {
@@ -173,32 +158,33 @@ export default {
             }
         },
     },
-
     mounted() {
         this.loadFavoriteCities();
         console.log(this.favoriteCities);
     }
 };
+
 </script>
 
 <template>
     <div class="search-form container mt-4">
+        <!-- Search Form -->
         <form @submit.prevent>
             <div class="mb-3">
                 <label for="inputCity" class="form-label">Type the city</label>
                 <input type="text" class="form-control" id="inputCity" aria-describedby="inputCity"
                     placeholder="ex: Milano" v-model="cityQuery" @input="fetchCitySuggestions">
-
                 <ul class="list-group mt-1" v-if="suggestions.length">
-                    <li v-for="suggestion in suggestions" :key="suggestion.name + suggestion.country"
+                    <li v-for="(suggestion, index) in suggestions" :key="suggestion.name + suggestion.country + index"
                         class="list-group-item list-group-item-action" @click="selectCity(suggestion)">
                         {{ suggestion.name }}, {{ suggestion.country }}
                     </li>
                 </ul>
             </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
+            <button type="submit" class="btn btn-primary w-100">Submit</button>
         </form>
 
+        <!-- Current weather data -->
         <div class="card mt-4" v-if="currentWeatherData">
             <div class="card-body">
                 <h5 class="card-title">Weather Data for {{ selectedCity.name }}</h5>
@@ -209,15 +195,19 @@ export default {
                     }}</p>
                 <p class="card-text"><strong>Time:</strong> {{ currentWeatherData.time }}</p>
             </div>
-            <font-awesome-icon
-                :icon="favoriteCities.some(city => city.latitude === selectedCity.latitude && city.longitude === selectedCity.longitude) ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"
-                @click="toggleFavoriteCity" />
+            <div class="card-footer text-center">
+                <font-awesome-icon
+                    :icon="favoriteCities.some(city => city.latitude === selectedCity.latitude && city.longitude === selectedCity.longitude) ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"
+                    @click="toggleFavoriteCity" class="favorite-icon" />
+            </div>
         </div>
 
-        <div>
+        <!-- Temperature's graph -->
+        <div class="mt-4">
             <TemperatureChart :temperatureData="temperatureData" :labels="labels" />
         </div>
 
+        <!-- Favorite Cities Table -->
         <div class="mt-4" v-if="favoriteWeatherData.length">
             <h3>Favorite Cities Weather</h3>
             <table class="table table-striped">
@@ -243,8 +233,81 @@ export default {
     </div>
 </template>
 
+
 <style lang="scss" scoped>
 .search-form {
     max-width: 600px;
+    margin: auto;
+
+    .form-label {
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .form-control {
+        border-radius: 10px;
+    }
+
+    .list-group-item {
+        cursor: pointer;
+
+        &:hover {
+            background-color: #f8f9fa;
+        }
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+        border-radius: 10px;
+    }
+
+    .card {
+        border-radius: 15px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-body {
+        padding: 20px;
+    }
+
+    .card-title {
+        font-size: 1.5rem;
+        margin-bottom: 15px;
+    }
+
+    .card-text {
+        font-size: 1rem;
+        margin-bottom: 10px;
+    }
+
+    .favorite-icon {
+        font-size: 1.5rem;
+        color: #ff4757;
+        cursor: pointer;
+
+        &:hover {
+            color: #ff6b81;
+        }
+    }
+
+    .table {
+        margin-top: 20px;
+
+        th,
+        td {
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        th {
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+    }
 }
 </style>
