@@ -1,6 +1,8 @@
 <script>
 import axios from 'axios';
 import { FontAwesomeIcon } from "../assets/js/font-awesome.js";
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { faSun, faCloud, faCloudRain, faSnowflake, faSmog, } from '@fortawesome/free-solid-svg-icons';
 import TemperatureChart from '@/components/TemperatureChart.vue';
 
 export default {
@@ -16,9 +18,11 @@ export default {
             currentWeatherData: null,
             hourlyWeatherData: null,
             favoriteCities: [],
-            favoriteWeatherData: {},
+            favoriteWeatherData: [],
             temperatureData: [],
             labels: [],
+            initialFavoriteWeatherData: [], // Save initial order
+            isSortedAsc: true, // Track sort order
         };
     },
     methods: {
@@ -50,6 +54,14 @@ export default {
             this.cityQuery = `${city.name}, ${city.country}`;
             this.suggestions = [];
         },
+
+        selectFavoriteCity(city) {
+            this.selectedCity = city;
+            this.cityQuery = `${city.name}, ${city.country}`;
+            this.suggestions = [];
+            this.fetchWeatherData();
+        },
+
         async fetchWeatherData() {
             const [latitude, longitude] = [this.selectedCity.latitude, this.selectedCity.longitude];
             axios.get("https://api.open-meteo.com/v1/forecast", {
@@ -105,6 +117,41 @@ export default {
             };
             return weatherConditions[weatherCode] || "Unknown";
         },
+
+        getWeatherIcon(weatherCode) {
+            const weatherIcons = {
+                0: 'fa-sun',
+                1: 'fa-sun',
+                2: 'fa-cloud',
+                3: 'fa-cloud',
+                45: 'fa-smog',
+                48: 'fa-smog',
+                51: 'fa-cloud-rain',
+                53: 'fa-cloud-rain',
+                55: 'fa-cloud-rain',
+                56: 'fa-cloud-rain',
+                57: 'fa-cloud-rain',
+                61: 'fa-cloud-rain',
+                63: 'fa-cloud-rain',
+                65: 'fa-cloud-rain',
+                66: 'fa-cloud-rain',
+                67: 'fa-cloud-rain',
+                71: 'fa-snowflake',
+                73: 'fa-snowflake',
+                75: 'fa-snowflake',
+                77: 'fa-snowflake',
+                80: 'fa-cloud-showers-heavy',
+                81: 'fa-cloud-showers-heavy',
+                82: 'fa-cloud-showers-heavy',
+                85: 'fa-snowflake',
+                86: 'fa-snowflake',
+                95: 'fa-poo-storm',
+                96: 'fa-poo-storm',
+                99: 'fa-poo-storm',
+            };
+            return weatherIcons[weatherCode] || 'fa-question';
+        },
+
         async fetchWeatherForFavoriteCities() {
             const requests = this.favoriteCities.map(city => {
                 return axios.get("https://api.open-meteo.com/v1/forecast", {
@@ -124,6 +171,7 @@ export default {
             try {
                 const results = await Promise.all(requests);
                 this.favoriteWeatherData = results;
+                this.initialFavoriteWeatherData = [...results]; // Save initial order
                 console.log(this.favoriteWeatherData);
             } catch (error) {
                 console.error("Error fetching weather data for favorite cities:", error);
@@ -157,6 +205,13 @@ export default {
                 this.fetchWeatherForFavoriteCities();
             }
         },
+        sortFavoriteCities() {
+            this.favoriteWeatherData.sort((a, b) => this.isSortedAsc ? a.weather.temperature_2m - b.weather.temperature_2m : b.weather.temperature_2m - a.weather.temperature_2m);
+            this.isSortedAsc = !this.isSortedAsc; // Toggle sort order
+        },
+        resetFavoriteCitiesOrder() {
+            this.favoriteWeatherData = [...this.initialFavoriteWeatherData]; // Reset to initial order
+        }
     },
     mounted() {
         this.loadFavoriteCities();
@@ -191,8 +246,11 @@ export default {
                 <p class="card-text"><strong>Temperature:</strong> {{ currentWeatherData.temperature_2m }} °C</p>
                 <p class="card-text"><strong>Wind Speed:</strong> {{ currentWeatherData.wind_speed_10m }} km/h</p>
                 <p class="card-text"><strong>Humidity:</strong> {{ currentWeatherData.relative_humidity_2m }} %</p>
-                <p class="card-text"><strong>Condition:</strong> {{ getWeatherCondition(currentWeatherData.weather_code)
-                    }}</p>
+                <p class="card-text">
+                    <strong>Condition:</strong>
+                    {{ getWeatherCondition(currentWeatherData.weather_code) }} 
+                    <font-awesome-icon :icon="getWeatherIcon(currentWeatherData.weather_code)" />
+                </p>
                 <p class="card-text"><strong>Time:</strong> {{ currentWeatherData.time }}</p>
             </div>
             <div class="card-footer text-center">
@@ -210,6 +268,8 @@ export default {
         <!-- Favorite Cities Table -->
         <div class="mt-4" v-if="favoriteWeatherData.length">
             <h3>Favorite Cities Weather</h3>
+            <button class="btn btn-secondary mb-3" @click="sortFavoriteCities">Sort by Temperature</button>
+            <button class="btn btn-secondary mb-3 ml-2" @click="resetFavoriteCitiesOrder">Reset Order</button>
             <table class="table table-striped">
                 <thead>
                     <tr>
@@ -220,7 +280,7 @@ export default {
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="(city, index) in favoriteWeatherData" :key="index" @click="selectCity(city.city)"
+                    <tr v-for="(city, index) in favoriteWeatherData" :key="index" @click="selectFavoriteCity(city.city)"
                         style="cursor: pointer;">
                         <td>{{ city.city.name }}</td>
                         <td>{{ city.city.country }}</td>
@@ -232,7 +292,6 @@ export default {
         </div>
     </div>
 </template>
-
 
 <style lang="scss" scoped>
 .search-form {
