@@ -1,6 +1,7 @@
 <script>
 import axios from 'axios';
 import { FontAwesomeIcon } from "../assets/js/font-awesome.js";
+import { Line } from 'vue-chartjs';
 
 export default {
     components: {
