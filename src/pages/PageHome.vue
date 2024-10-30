@@ -2,14 +2,17 @@
 import axios from 'axios';
 import { FontAwesomeIcon } from "../assets/js/font-awesome.js";
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { faSun, faCloud, faCloudRain, faSnowflake, faSmog, } from '@fortawesome/free-solid-svg-icons';
+import { faSun, faCloud, faCloudRain, faSnowflake, faSmog } from '@fortawesome/free-solid-svg-icons';
 import TemperatureChart from '@/components/TemperatureChart.vue';
+
+library.add(faSun, faCloud, faCloudRain, faSnowflake, faSmog);
 
 export default {
     components: {
         FontAwesomeIcon,
         TemperatureChart,
     },
+
     data() {
         return {
             cityQuery: "",
@@ -25,6 +28,7 @@ export default {
             isSortedAsc: true, // Track sort order
         };
     },
+
     methods: {
         async fetchCitySuggestions() {
             if (this.cityQuery.length > 2) {
@@ -49,6 +53,7 @@ export default {
                 this.suggestions = [];
             }
         },
+
         selectCity(city) {
             this.selectedCity = city;
             this.cityQuery = `${city.name}, ${city.country}`;
@@ -84,6 +89,7 @@ export default {
                 console.error("Error fetching weather data:", error);
             });
         },
+
         getWeatherCondition(weatherCode) {
             const weatherConditions = {
                 0: "Clear sky",
@@ -177,6 +183,7 @@ export default {
                 console.error("Error fetching weather data for favorite cities:", error);
             }
         },
+
         toggleFavoriteCity() {
             const favCity = {
                 name: this.selectedCity.name,
@@ -195,9 +202,11 @@ export default {
             this.saveFavoriteCities();
             this.loadFavoriteCities();
         },
+
         saveFavoriteCities() {
             localStorage.setItem('favoriteCities', JSON.stringify(this.favoriteCities));
         },
+
         loadFavoriteCities() {
             const favoriteCities = localStorage.getItem('favoriteCities');
             if (favoriteCities) {
@@ -205,14 +214,17 @@ export default {
                 this.fetchWeatherForFavoriteCities();
             }
         },
+
         sortFavoriteCities() {
             this.favoriteWeatherData.sort((a, b) => this.isSortedAsc ? a.weather.temperature_2m - b.weather.temperature_2m : b.weather.temperature_2m - a.weather.temperature_2m);
             this.isSortedAsc = !this.isSortedAsc; // Toggle sort order
         },
+
         resetFavoriteCitiesOrder() {
             this.favoriteWeatherData = [...this.initialFavoriteWeatherData]; // Reset to initial order
         }
     },
+
     mounted() {
         this.loadFavoriteCities();
         console.log(this.favoriteCities);
@@ -248,7 +260,7 @@ export default {
                 <p class="card-text"><strong>Humidity:</strong> {{ currentWeatherData.relative_humidity_2m }} %</p>
                 <p class="card-text">
                     <strong>Condition:</strong>
-                    {{ getWeatherCondition(currentWeatherData.weather_code) }} 
+                    {{ getWeatherCondition(currentWeatherData.weather_code) }}
                     <font-awesome-icon :icon="getWeatherIcon(currentWeatherData.weather_code)" />
                 </p>
                 <p class="card-text"><strong>Time:</strong> {{ currentWeatherData.time }}</p>
@@ -268,8 +280,17 @@ export default {
         <!-- Favorite Cities Table -->
         <div class="mt-4" v-if="favoriteWeatherData.length">
             <h3>Favorite Cities Weather</h3>
-            <button class="btn btn-secondary mb-3" @click="sortFavoriteCities">Sort by Temperature</button>
-            <button class="btn btn-secondary mb-3 ml-2" @click="resetFavoriteCitiesOrder">Reset Order</button>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <button class="btn btn-secondary" @click="sortFavoriteCities">
+                        <font-awesome-icon :icon="isSortedAsc ? 'fa-sort-amount-down' : 'fa-sort-amount-up'" />
+                    </button>
+                    <button class="btn btn-secondary ml-2" v-if="favoriteWeatherData !== initialFavoriteWeatherData"
+                        @click="resetFavoriteCitiesOrder">
+                        Reset Order
+                    </button>
+                </div>
+            </div>
             <table class="table table-striped">
                 <thead>
                     <tr>
@@ -321,6 +342,12 @@ export default {
         border-radius: 10px;
     }
 
+    .btn-secondary {
+        background-color: #6c757d;
+        border-color: #6c757d;
+        border-radius: 10px;
+    }
+
     .card {
         border-radius: 15px;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -362,11 +389,24 @@ export default {
         th {
             background-color: #007bff;
             color: #fff;
+
+            .btn {
+                color: #fff;
+                padding: 0.25rem 0.5rem;
+            }
         }
 
         tr:hover {
             background-color: #f1f1f1;
         }
+    }
+
+    .d-flex {
+        justify-content: space-between;
+    }
+
+    .ml-2 {
+        margin-left: 0.5rem;
     }
 }
 </style>
