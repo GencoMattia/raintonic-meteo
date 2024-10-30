@@ -11,11 +11,12 @@ export default {
     props: {
         temperatureData: {
             type: Array,
-            required: true,
+            required: true
         },
-
-        labels: Array,
-        required: true,
+        labels: {
+            type: Array,
+            required: true
+        }
     },
 
     data() {
@@ -25,47 +26,39 @@ export default {
     },
 
     computed: {
-        chartData() {
+        data() {
             return {
                 labels: this.labels,
-
                 datasets: [
                     {
-                        label: "Temperature (C°)",
-                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                        borderColor: 'rgba(75, 192, 192, 1)',
+                        label: 'Temperature',
                         data: this.temperatureData,
-                    },
-                ],
-            }
+                        fill: false,
+                        borderColor: 'blue',
+                        tension: 0.1
+                    }
+                ]
+            };
         },
-
-        chartOptions() {
+        options() {
             return {
                 responsive: true,
-                mantainAspectRatio: false,
+                maintainAspectRatio: false,
                 scales: {
-                    x: {
-                        title: {
-                            display: true,
-                            text: "Time",
-                        },
-                    },
-
                     y: {
-                        display: true,
-                        text: "Temperature (C°)"
+                        beginAtZero: true
                     }
                 }
-            }
+            };
         }
-    }
+    },
 };
 </script>
 
 <template>
     <div>
-        <LineChart :chartData="chartData" :options="chartOptions" />
+        <LineChart v-if="data && data.labels.length" :data="data" :options="options" />
+        <p v-else>Loading data...</p>
     </div>
 </template>
 

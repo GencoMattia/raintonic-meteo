@@ -1,11 +1,12 @@
 <script>
 import axios from 'axios';
 import { FontAwesomeIcon } from "../assets/js/font-awesome.js";
-import { Line } from 'vue-chartjs';
+import TemperatureChart from '@/components/TemperatureChart.vue';
 
 export default {
     components: {
         FontAwesomeIcon,
+        TemperatureChart,
     },
 
     data() {
@@ -17,13 +18,13 @@ export default {
             hourlyWeatherData: null,
             favoriteCities: [],
             favoriteWeatherData: {},
+            temperatureData: [],
+            labels: [],
         };
     },
 
     methods: {
         async fetchCitySuggestions() {
-            event.preventDefault();
-
             if (this.cityQuery.length > 2) {
                 axios.get("https://geocoding-api.open-meteo.com/v1/search", {
                     params: {
@@ -56,19 +57,24 @@ export default {
         },
 
         async fetchWeatherData(latitude, longitude) {
-            event.preventDefault();
-
             axios.get("https://api.open-meteo.com/v1/forecast", {
                 params: {
                     latitude: latitude,
                     longitude: longitude,
-                    hourly: "temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m",
+                    hourly: "temperature_2m",
                     current: "temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m",
                 }
             }).then((response) => {
                 console.log("API response:", response.data);
-                this.currentWeatherData = response.data.current;
-                this.hourlyWeatherData = response.data.hourly;
+                const hourlyData = response.data.hourly;
+                const currentData = response.data.current;
+
+                this.currentWeatherData = currentData;
+                this.temperatureData = hourlyData.temperature_2m.slice(0, 24);
+                this.labels = hourlyData.time.slice(0, 24).map(time => new Date(time).getHours() + ":00")
+
+                console.log(this.temperatureData);
+                console.log(this.labels);
             }).catch((error) => {
                 console.error("Error fetching weather data:", error);
             })
@@ -114,7 +120,7 @@ export default {
                     params: {
                         latitude: city.latitude,
                         longitude: city.longitude,
-                        hourly: "temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m",
+                        hourly: "temperature_2m",
                         current: "temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m",
                     }
                 }).then(response => {
@@ -208,6 +214,10 @@ export default {
                 @click="toggleFavoriteCity" />
         </div>
 
+        <div>
+            <TemperatureChart :temperatureData="temperatureData" :labels="labels" />
+        </div>
+
         <div class="mt-4" v-if="favoriteWeatherData.length">
             <h3>Favorite Cities Weather</h3>
             <table class="table table-striped">
@@ -230,15 +240,6 @@ export default {
                 </tbody>
             </table>
         </div>
-
-        <!-- <div class="mt-4" v-if="hourlyWeatherData">
-            <h3>Hourly Weather Forecast</h3>
-            <ul class="list-group">
-                <li v-for="(temp, index) in hourlyWeatherData.temperature_2m" :key="index" class="list-group-item">
-                    <strong>{{ hourlyWeatherData.time[index] }}</strong> - {{ temp }} °C
-                </li>
-            </ul>
-        </div> -->
     </div>
 </template>
 
