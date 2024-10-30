@@ -47,12 +47,11 @@ export default {
         },
         selectCity(city) {
             this.selectedCity = city;
-            this.suggestions = [];
             this.cityQuery = `${city.name}, ${city.country}`;
-            this.fetchWeatherData(city.latitude, city.longitude);
-            console.log(this.selectedCity);
+            this.suggestions = [];
         },
-        async fetchWeatherData(latitude, longitude) {
+        async fetchWeatherData() {
+            const [latitude, longitude] = [this.selectedCity.latitude, this.selectedCity.longitude];
             axios.get("https://api.open-meteo.com/v1/forecast", {
                 params: {
                     latitude: latitude,
@@ -146,6 +145,7 @@ export default {
                 this.favoriteCities.splice(isFavoriteIndex, 1);
             }
             this.saveFavoriteCities();
+            this.loadFavoriteCities();
         },
         saveFavoriteCities() {
             localStorage.setItem('favoriteCities', JSON.stringify(this.favoriteCities));
@@ -181,7 +181,7 @@ export default {
                     </li>
                 </ul>
             </div>
-            <button type="submit" class="btn btn-primary w-100">Submit</button>
+            <button type="submit" class="btn btn-primary w-100" @click="fetchWeatherData">Submit</button>
         </form>
 
         <!-- Current weather data -->
