@@ -236,7 +236,7 @@ export default {
 <template>
     <main class="search-form container mt-4">
         <div class="row">
-            <div class="left-panel col-5">
+            <div class="left-panel col-md-12 col-lg-5 mb-md-4">
                 <!-- Favorite Cities Table -->
                 <div class="favorite-weather" v-if="favoriteWeatherData.length">
                     <h3 class="section-title text-center">
@@ -272,7 +272,7 @@ export default {
                 </div>
             </div>
 
-            <div class="right-panel col-7">
+            <div class="right-panel col-md-12 col-lg-7 order-md-0">
                 <!-- Search Form -->
                 <form class="row mb-3" @submit.prevent>
                     <div class="col-10">
@@ -328,6 +328,7 @@ export default {
     background-color: #f7fdfe;
     border-radius: 15px;
     box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+    overflow-x: auto;
 
     .section-title {
         font-size: 1.8rem;
@@ -337,7 +338,7 @@ export default {
     }
 
     .favorite-table {
-        overflow-y: auto;r
+        overflow-y: auto;
 
         th {
             background-color: #0096ff;
