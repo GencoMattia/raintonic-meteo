@@ -246,7 +246,7 @@ export default {
                         <table class="table table-hover border rounded">
                             <thead>
                                 <tr>
-                                    <th>Cuty</th>
+                                    <th>City</th>
                                     <th>Country</th>
                                     <th>
                                         Temperature
