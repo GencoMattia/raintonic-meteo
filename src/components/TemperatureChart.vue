@@ -58,7 +58,7 @@ export default {
 <template>
     <div>
         <LineChart v-if="data && data.labels.length" :data="data" :options="options" />
-        <p v-else>Loading data...</p>
+        <p v-else>Waiting for selection...</p>
     </div>
 </template>
 

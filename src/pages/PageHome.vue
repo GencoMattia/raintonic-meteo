@@ -238,41 +238,37 @@ export default {
         <div class="row">
             <div class="left-panel col-5">
                 <!-- Favorite Cities Table -->
-                <div class="" v-if="favoriteWeatherData.length">
-                    <h3>Favorite Cities Weather</h3>
-                    <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="favorite-weather" v-if="favoriteWeatherData.length">
+                    <h3 class="section-title text-center">
+                        Favorite Cities
+                    </h3>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <table class="table table-hover border rounded">
+                            <thead>
+                                <tr>
+                                    <th>Cuty</th>
+                                    <th>Country</th>
+                                    <th>
+                                        Temperature
+                                        <button class="btn btn-primary btn-sort" @click="sortFavoriteCities">
+                                            <font-awesome-icon
+                                                :icon="isSortedAsc ? 'fa-sort-amount-down' : 'fa-sort-amount-up'" />
+                                        </button>
+                                    </th>
+                                    <th>Weather</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="(city, index) in favoriteWeatherData" :key="index"
+                                    @click="selectFavoriteCity(city.city)" style="cursor: pointer;">
+                                    <td>{{ city.city.name }}</td>
+                                    <td>{{ city.city.country }}</td>
+                                    <td>{{ city.weather.temperature_2m }} °C</td>
+                                    <td>{{ getWeatherCondition(city.weather.weather_code) }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>City</th>
-                                <th>Country</th>
-                                <th>
-                                    Temperature
-                                    <button class="btn btn-primary" @click="sortFavoriteCities">
-                                        <font-awesome-icon
-                                            :icon="isSortedAsc ? 'fa-sort-amount-down' : 'fa-sort-amount-up'" />
-                                    </button>
-                                </th>
-                                <th>Condition</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="(city, index) in favoriteWeatherData" :key="index"
-                                @click="selectFavoriteCity(city.city)" style="cursor: pointer;">
-                                <td>{{ city.city.name }}</td>
-                                <td>{{ city.city.country }}</td>
-                                <td>{{ city.weather.temperature_2m }} °C</td>
-                                <td>{{ getWeatherCondition(city.weather.weather_code) }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <!-- <div>
-                        <button class="btn btn-secondary ml-2" v-if="favoriteWeatherData !== initialFavoriteWeatherData"
-                            @click="resetFavoriteCitiesOrder">
-                            Reset Order
-                        </button>
-                    </div> -->
                 </div>
             </div>
 
@@ -327,15 +323,54 @@ export default {
 </template>
 
 <style lang="scss" scoped>
+.favorite-weather {
+    padding: 1.5rem;
+    background-color: #f7fdfe;
+    border-radius: 15px;
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+
+    .section-title {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: #007bff;
+        margin-bottom: 1rem;
+    }
+
+    .favorite-table {
+        overflow-y: auto;r
+
+        th {
+            background-color: #0096ff;
+            color: #ffffff;
+            font-weight: bold;
+        }
+
+        tr:hover {
+            background-color: #e6f7ff;
+        }
+
+        .btn-sort {
+            background-color: #007bbd;
+            border-color: #007bbd;
+            transition: background-color 0.3s ease;
+
+            &:hover {
+                background-color: #005a8d;
+            }
+        }
+    }
+}
+
 .search-form {
     padding: 2rem;
-    background-color: #f0f4f8; // Colore di sfondo chiaro per l'intera area della form
+    background-color: #f0f4f8;
     border-radius: 15px;
     box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
 
     .form-control {
         border-radius: 8px;
         border: 1px solid #a0aec0;
+
         &:focus {
             box-shadow: 0 0 8px rgba(0, 123, 255, 0.4);
             border-color: #007bff;
@@ -344,6 +379,7 @@ export default {
 
     .list-group-item {
         cursor: pointer;
+
         &:hover {
             background-color: #e2e8f0;
         }
@@ -353,9 +389,11 @@ export default {
         background-color: #0096ff;
         border-color: #0096ff;
         transition: background-color 0.3s ease;
+
         &:hover {
             background-color: #007bbd;
         }
+
         border-radius: 8px;
     }
 
@@ -363,15 +401,18 @@ export default {
         border-radius: 15px;
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
         background: linear-gradient(135deg, #e0f7fa, #ffffff);
+
         .card-body {
             padding: 1.5rem;
             text-align: center;
         }
+
         .card-title {
             font-size: 1.5rem;
             font-weight: bold;
             color: #007bff;
         }
+
         .card-text {
             font-size: 1.1rem;
             color: #4a5568;
@@ -383,6 +424,7 @@ export default {
         color: #ff4757;
         cursor: pointer;
         transition: color 0.3s ease;
+
         &:hover {
             color: #ff6b81;
         }
@@ -392,19 +434,24 @@ export default {
         background-color: #ffffff;
         border-radius: 10px;
         overflow: hidden;
-        th, td {
+
+        th,
+        td {
             text-align: center;
             vertical-align: middle;
             padding: 0.75rem;
         }
+
         th {
             background-color: #0096ff;
             color: #ffffff;
             font-weight: bold;
         }
+
         tr:hover {
             background-color: #e6f7ff;
         }
+
         .btn {
             padding: 0.3rem 0.6rem;
             color: #ffffff;
