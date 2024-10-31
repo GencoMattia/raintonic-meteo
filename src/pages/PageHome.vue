@@ -267,22 +267,21 @@ export default {
                             </tr>
                         </tbody>
                     </table>
-                    <div>
+                    <!-- <div>
                         <button class="btn btn-secondary ml-2" v-if="favoriteWeatherData !== initialFavoriteWeatherData"
                             @click="resetFavoriteCitiesOrder">
                             Reset Order
                         </button>
-                    </div>
+                    </div> -->
                 </div>
             </div>
 
             <div class="right-panel col-8">
                 <!-- Search Form -->
-                <form @submit.prevent>
-                    <div class="mb-3">
-                        <label for="inputCity" class="form-label">Type the city</label>
+                <form class="row mb-3" @submit.prevent>
+                    <div class="col-10">
                         <input type="text" class="form-control" id="inputCity" aria-describedby="inputCity"
-                            placeholder="ex: Milano" v-model="cityQuery" @input="fetchCitySuggestions">
+                            placeholder="Type the city" v-model="cityQuery" @input="fetchCitySuggestions">
                         <ul class="list-group mt-1" v-if="suggestions.length">
                             <li v-for="(suggestion, index) in suggestions"
                                 :key="suggestion.name + suggestion.country + index"
@@ -291,11 +290,11 @@ export default {
                             </li>
                         </ul>
                     </div>
-                    <button type="submit" class="btn btn-primary w-100" @click="fetchWeatherData">Submit</button>
+                    <button type="submit" class="btn btn-primary col-2" @click="fetchWeatherData">Submit</button>
                 </form>
 
                 <!-- Current weather data -->
-                <div class="card mt-4" v-if="currentWeatherData">
+                <div class="card mb-4" v-if="currentWeatherData">
                     <div class="card-body">
                         <h5 class="card-title">Weather Data for {{ selectedCity.name }}</h5>
                         <p class="card-text"><strong>Temperature:</strong> {{ currentWeatherData.temperature_2m }} °C
@@ -319,7 +318,7 @@ export default {
                 </div>
 
                 <!-- Temperature's graph -->
-                <div class="mt-4">
+                <div class="">
                     <TemperatureChart :temperatureData="temperatureData" :labels="labels" />
                 </div>
             </div>
