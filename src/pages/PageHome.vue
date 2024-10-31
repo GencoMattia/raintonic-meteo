@@ -236,9 +236,9 @@ export default {
 <template>
     <main class="search-form container mt-4">
         <div class="row">
-            <div class="left-panel col-md-12 col-lg-5 mb-md-4">
+            <div class="left-panel col-md-12 col-lg-5 mb-4">
                 <!-- Favorite Cities Table -->
-                <div class="favorite-weather" v-if="favoriteWeatherData.length">
+                <div class="favorite-weather">
                     <h3 class="section-title text-center">
                         Favorite Cities
                     </h3>
@@ -258,13 +258,18 @@ export default {
                                     <th>Weather</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody v-if="favoriteWeatherData.length">
                                 <tr v-for="(city, index) in favoriteWeatherData" :key="index"
                                     @click="selectFavoriteCity(city.city)" style="cursor: pointer;">
                                     <td>{{ city.city.name }}</td>
                                     <td>{{ city.city.country }}</td>
                                     <td>{{ city.weather.temperature_2m }} °C</td>
                                     <td>{{ getWeatherCondition(city.weather.weather_code) }}</td>
+                                </tr>
+                            </tbody>
+                            <tbody v-else>
+                                <tr>
+                                    <td colspan="4">There are no favorite cities yet</td>
                                 </tr>
                             </tbody>
                         </table>
