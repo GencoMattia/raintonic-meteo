@@ -328,96 +328,87 @@ export default {
 
 <style lang="scss" scoped>
 .search-form {
-    margin: auto;
-
-    .form-label {
-        font-weight: bold;
-        margin-bottom: 10px;
-    }
+    padding: 2rem;
+    background-color: #f0f4f8; // Colore di sfondo chiaro per l'intera area della form
+    border-radius: 15px;
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
 
     .form-control {
-        border-radius: 10px;
+        border-radius: 8px;
+        border: 1px solid #a0aec0;
+        &:focus {
+            box-shadow: 0 0 8px rgba(0, 123, 255, 0.4);
+            border-color: #007bff;
+        }
     }
 
     .list-group-item {
         cursor: pointer;
-
         &:hover {
-            background-color: #f8f9fa;
+            background-color: #e2e8f0;
         }
     }
 
     .btn-primary {
-        background-color: #007bff;
-        border-color: #007bff;
-        border-radius: 10px;
-    }
-
-    .btn-secondary {
-        background-color: #6c757d;
-        border-color: #6c757d;
-        border-radius: 10px;
+        background-color: #0096ff;
+        border-color: #0096ff;
+        transition: background-color 0.3s ease;
+        &:hover {
+            background-color: #007bbd;
+        }
+        border-radius: 8px;
     }
 
     .card {
         border-radius: 15px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    .card-body {
-        padding: 20px;
-    }
-
-    .card-title {
-        font-size: 1.5rem;
-        margin-bottom: 15px;
-    }
-
-    .card-text {
-        font-size: 1rem;
-        margin-bottom: 10px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        background: linear-gradient(135deg, #e0f7fa, #ffffff);
+        .card-body {
+            padding: 1.5rem;
+            text-align: center;
+        }
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .card-text {
+            font-size: 1.1rem;
+            color: #4a5568;
+        }
     }
 
     .favorite-icon {
-        font-size: 1.5rem;
+        font-size: 1.6rem;
         color: #ff4757;
         cursor: pointer;
-
+        transition: color 0.3s ease;
         &:hover {
             color: #ff6b81;
         }
     }
 
     .table {
-        margin-top: 20px;
-
-        th,
-        td {
+        background-color: #ffffff;
+        border-radius: 10px;
+        overflow: hidden;
+        th, td {
             text-align: center;
             vertical-align: middle;
+            padding: 0.75rem;
         }
-
         th {
-            background-color: #007bff;
-            color: #fff;
-
-            .btn {
-                color: #fff;
-                padding: 0.25rem 0.5rem;
-            }
+            background-color: #0096ff;
+            color: #ffffff;
+            font-weight: bold;
         }
-
         tr:hover {
-            background-color: #f1f1f1;
+            background-color: #e6f7ff;
         }
-    }
-
-    .d-flex {
-        justify-content: space-between;
-    }
-
-    .ml-2 {
-        margin-left: 0.5rem;
+        .btn {
+            padding: 0.3rem 0.6rem;
+            color: #ffffff;
+        }
     }
 }
 </style>
