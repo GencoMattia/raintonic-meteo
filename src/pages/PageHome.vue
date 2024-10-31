@@ -236,7 +236,7 @@ export default {
 <template>
     <main class="search-form container mt-4">
         <div class="row">
-            <div class="left-panel col-4">
+            <div class="left-panel col-5">
                 <!-- Favorite Cities Table -->
                 <div class="" v-if="favoriteWeatherData.length">
                     <h3>Favorite Cities Weather</h3>
@@ -276,7 +276,7 @@ export default {
                 </div>
             </div>
 
-            <div class="right-panel col-8">
+            <div class="right-panel col-7">
                 <!-- Search Form -->
                 <form class="row mb-3" @submit.prevent>
                     <div class="col-10">
