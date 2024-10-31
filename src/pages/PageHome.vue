@@ -234,92 +234,101 @@ export default {
 </script>
 
 <template>
-    <div class="search-form container mt-4">
-        <!-- Search Form -->
-        <form @submit.prevent>
-            <div class="mb-3">
-                <label for="inputCity" class="form-label">Type the city</label>
-                <input type="text" class="form-control" id="inputCity" aria-describedby="inputCity"
-                    placeholder="ex: Milano" v-model="cityQuery" @input="fetchCitySuggestions">
-                <ul class="list-group mt-1" v-if="suggestions.length">
-                    <li v-for="(suggestion, index) in suggestions" :key="suggestion.name + suggestion.country + index"
-                        class="list-group-item list-group-item-action" @click="selectCity(suggestion)">
-                        {{ suggestion.name }}, {{ suggestion.country }}
-                    </li>
-                </ul>
-            </div>
-            <button type="submit" class="btn btn-primary w-100" @click="fetchWeatherData">Submit</button>
-        </form>
-
-        <!-- Current weather data -->
-        <div class="card mt-4" v-if="currentWeatherData">
-            <div class="card-body">
-                <h5 class="card-title">Weather Data for {{ selectedCity.name }}</h5>
-                <p class="card-text"><strong>Temperature:</strong> {{ currentWeatherData.temperature_2m }} °C</p>
-                <p class="card-text"><strong>Wind Speed:</strong> {{ currentWeatherData.wind_speed_10m }} km/h</p>
-                <p class="card-text"><strong>Humidity:</strong> {{ currentWeatherData.relative_humidity_2m }} %</p>
-                <p class="card-text">
-                    <strong>Condition:</strong>
-                    {{ getWeatherCondition(currentWeatherData.weather_code) }}
-                    <font-awesome-icon :icon="getWeatherIcon(currentWeatherData.weather_code)" />
-                </p>
-                <p class="card-text"><strong>Time:</strong> {{ currentWeatherData.time }}</p>
-            </div>
-            <div class="card-footer text-center">
-                <font-awesome-icon
-                    :icon="favoriteCities.some(city => city.latitude === selectedCity.latitude && city.longitude === selectedCity.longitude) ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"
-                    @click="toggleFavoriteCity" class="favorite-icon" />
-            </div>
-        </div>
-
-        <!-- Temperature's graph -->
-        <div class="mt-4">
-            <TemperatureChart :temperatureData="temperatureData" :labels="labels" />
-        </div>
-
-        <!-- Favorite Cities Table -->
-        <div class="mt-4" v-if="favoriteWeatherData.length">
-            <h3>Favorite Cities Weather</h3>
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <div>
-
-                    <button class="btn btn-secondary ml-2" v-if="favoriteWeatherData !== initialFavoriteWeatherData"
-                        @click="resetFavoriteCitiesOrder">
-                        Reset Order
-                    </button>
+    <main class="search-form container mt-4">
+        <div class="row">
+            <div class="left-panel col-4">
+                <!-- Favorite Cities Table -->
+                <div class="" v-if="favoriteWeatherData.length">
+                    <h3>Favorite Cities Weather</h3>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                    </div>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>City</th>
+                                <th>Country</th>
+                                <th>
+                                    Temperature
+                                    <button class="btn btn-primary" @click="sortFavoriteCities">
+                                        <font-awesome-icon
+                                            :icon="isSortedAsc ? 'fa-sort-amount-down' : 'fa-sort-amount-up'" />
+                                    </button>
+                                </th>
+                                <th>Condition</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(city, index) in favoriteWeatherData" :key="index"
+                                @click="selectFavoriteCity(city.city)" style="cursor: pointer;">
+                                <td>{{ city.city.name }}</td>
+                                <td>{{ city.city.country }}</td>
+                                <td>{{ city.weather.temperature_2m }} °C</td>
+                                <td>{{ getWeatherCondition(city.weather.weather_code) }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div>
+                        <button class="btn btn-secondary ml-2" v-if="favoriteWeatherData !== initialFavoriteWeatherData"
+                            @click="resetFavoriteCitiesOrder">
+                            Reset Order
+                        </button>
+                    </div>
                 </div>
             </div>
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>City</th>
-                        <th>Country</th>
-                        <th>
-                            Temperature
-                            <button class="btn btn-secondary" @click="sortFavoriteCities">
-                                <font-awesome-icon :icon="isSortedAsc ? 'fa-sort-amount-down' : 'fa-sort-amount-up'" />
-                            </button>
-                        </th>
-                        <th>Condition</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="(city, index) in favoriteWeatherData" :key="index" @click="selectFavoriteCity(city.city)"
-                        style="cursor: pointer;">
-                        <td>{{ city.city.name }}</td>
-                        <td>{{ city.city.country }}</td>
-                        <td>{{ city.weather.temperature_2m }} °C</td>
-                        <td>{{ getWeatherCondition(city.weather.weather_code) }}</td>
-                    </tr>
-                </tbody>
-            </table>
+
+            <div class="right-panel col-8">
+                <!-- Search Form -->
+                <form @submit.prevent>
+                    <div class="mb-3">
+                        <label for="inputCity" class="form-label">Type the city</label>
+                        <input type="text" class="form-control" id="inputCity" aria-describedby="inputCity"
+                            placeholder="ex: Milano" v-model="cityQuery" @input="fetchCitySuggestions">
+                        <ul class="list-group mt-1" v-if="suggestions.length">
+                            <li v-for="(suggestion, index) in suggestions"
+                                :key="suggestion.name + suggestion.country + index"
+                                class="list-group-item list-group-item-action" @click="selectCity(suggestion)">
+                                {{ suggestion.name }}, {{ suggestion.country }}
+                            </li>
+                        </ul>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100" @click="fetchWeatherData">Submit</button>
+                </form>
+
+                <!-- Current weather data -->
+                <div class="card mt-4" v-if="currentWeatherData">
+                    <div class="card-body">
+                        <h5 class="card-title">Weather Data for {{ selectedCity.name }}</h5>
+                        <p class="card-text"><strong>Temperature:</strong> {{ currentWeatherData.temperature_2m }} °C
+                        </p>
+                        <p class="card-text"><strong>Wind Speed:</strong> {{ currentWeatherData.wind_speed_10m }} km/h
+                        </p>
+                        <p class="card-text"><strong>Humidity:</strong> {{ currentWeatherData.relative_humidity_2m }} %
+                        </p>
+                        <p class="card-text">
+                            <strong>Condition:</strong>
+                            {{ getWeatherCondition(currentWeatherData.weather_code) }}
+                            <font-awesome-icon :icon="getWeatherIcon(currentWeatherData.weather_code)" />
+                        </p>
+                        <p class="card-text"><strong>Time:</strong> {{ currentWeatherData.time }}</p>
+                    </div>
+                    <div class="card-footer text-center">
+                        <font-awesome-icon
+                            :icon="favoriteCities.some(city => city.latitude === selectedCity.latitude && city.longitude === selectedCity.longitude) ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"
+                            @click="toggleFavoriteCity" class="favorite-icon" />
+                    </div>
+                </div>
+
+                <!-- Temperature's graph -->
+                <div class="mt-4">
+                    <TemperatureChart :temperatureData="temperatureData" :labels="labels" />
+                </div>
+            </div>
         </div>
-    </div>
+    </main>
 </template>
 
 <style lang="scss" scoped>
 .search-form {
-    max-width: 600px;
     margin: auto;
 
     .form-label {
