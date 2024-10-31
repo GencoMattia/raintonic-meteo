@@ -283,7 +283,7 @@ export default {
                     <div class="col-10">
                         <input type="text" class="form-control" id="inputCity" aria-describedby="inputCity"
                             placeholder="Type the city" v-model="cityQuery" @input="fetchCitySuggestions">
-                        <ul class="list-group mt-1" v-if="suggestions.length">
+                        <ul class="list-group mt-1 dropdown-menu" v-if="suggestions.length">
                             <li v-for="(suggestion, index) in suggestions"
                                 :key="suggestion.name + suggestion.country + index"
                                 class="list-group-item list-group-item-action" @click="selectCity(suggestion)">
