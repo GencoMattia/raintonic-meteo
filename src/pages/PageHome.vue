@@ -56,8 +56,10 @@ export default {
 
         selectCity(city) {
             this.selectedCity = city;
-            this.cityQuery = `${city.name}, ${city.country}`;
             this.suggestions = [];
+            this.cityQuery = `${city.name}, ${city.country}`;
+            this.fetchWeatherData(city.latitude, city.longitude);
+            console.log(this.selectedCity);
         },
 
         selectFavoriteCity(city) {
@@ -67,8 +69,7 @@ export default {
             this.fetchWeatherData();
         },
 
-        async fetchWeatherData() {
-            const [latitude, longitude] = [this.selectedCity.latitude, this.selectedCity.longitude];
+        async fetchWeatherData(latitude, longitude) {
             axios.get("https://api.open-meteo.com/v1/forecast", {
                 params: {
                     latitude: latitude,
@@ -246,7 +247,7 @@ export default {
                         <table class="table table-hover border rounded">
                             <thead>
                                 <tr>
-                                    <th>Cuty</th>
+                                    <th>City</th>
                                     <th>Country</th>
                                     <th>
                                         Temperature
@@ -279,11 +280,11 @@ export default {
 
             <div class="right-panel col-md-12 col-lg-7 order-md-0">
                 <!-- Search Form -->
-                <form class="row mb-3" @submit.prevent>
-                    <div class="col-10">
+                <form class="mb-3" @submit.prevent>
+                    <div class="search-input-container">
                         <input type="text" class="form-control" id="inputCity" aria-describedby="inputCity"
                             placeholder="Type the city" v-model="cityQuery" @input="fetchCitySuggestions">
-                        <ul class="list-group mt-1 dropdown-menu" v-if="suggestions.length">
+                        <ul class="list-group dropdown-menu p-0" v-if="suggestions.length">
                             <li v-for="(suggestion, index) in suggestions"
                                 :key="suggestion.name + suggestion.country + index"
                                 class="list-group-item list-group-item-action" @click="selectCity(suggestion)">
@@ -291,7 +292,6 @@ export default {
                             </li>
                         </ul>
                     </div>
-                    <button type="submit" class="btn btn-primary col-2" @click="fetchWeatherData">Submit</button>
                 </form>
 
                 <!-- Current weather data -->
@@ -328,6 +328,18 @@ export default {
 </template>
 
 <style lang="scss" scoped>
+
+.search-input-container {
+    position: relative;
+
+    .dropdown-menu {
+        position: absolute;
+        bottom: 1;
+        left: 0;
+        right: 0;
+    }
+}
+
 .favorite-weather {
     padding: 1.5rem;
     background-color: #f7fdfe;
