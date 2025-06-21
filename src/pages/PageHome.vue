@@ -66,7 +66,7 @@ export default {
             this.selectedCity = city;
             this.cityQuery = `${city.name}, ${city.country}`;
             this.suggestions = [];
-            this.fetchWeatherData();
+            this.fetchWeatherData(city.latitude, city.longitude);
         },
 
         async fetchWeatherData(latitude, longitude) {
@@ -477,3 +477,4 @@ export default {
     }
 }
 </style>
+``` 
